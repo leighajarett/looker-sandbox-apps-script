@@ -43,61 +43,59 @@ function trial_users(){
           var user_id = parseInt(existing_user[0].id)
           //if youre trying to extend a user then renable them
           if(selection.getCell(row,new_user_column).getValue() == "Extend"){
-            enableUser(base_url,user_id, access_token)
-            return
+            var user_id = enableUser(base_url,user_id, access_token)
+          }
         }
-      }
-      else{
-        var user_id = createNewUser(base_url,access_token);
-        addEmail(base_url, email, user_id, access_token);
-      }
-      // add to groups
-      if(selection.getCell(row,looker_user_column).getValue().indexOf('Prospect') == -1){
-        //add to looker group if internal user
-        addGroup(base_url, user_id, 21, access_token);
-      }
-      //developers
-      if(selection.getCell(row,is_developer_column).getValue().indexOf('Developer') > -1){
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Healthcare') >= 0){
-          addGroup(base_url, user_id, 13, access_token);
+        else{
+          var user_id = createNewUser(base_url,access_token);
+          addEmail(base_url, email, user_id, access_token);
         }
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Financial') >= 0){
-          addGroup(base_url, user_id, 19,access_token);
+        // add to groups
+        if(selection.getCell(row,looker_user_column).getValue().indexOf('Prospect') == -1){
+          //add to looker group if internal user
+          addGroup(base_url, user_id, 21, access_token);
         }
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Retail') >= 0){
-          addGroup(base_url, user_id, 15,access_token);
+        //developers
+        if(selection.getCell(row,is_developer_column).getValue().indexOf('Developer') > -1){
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Healthcare') >= 0){
+            addGroup(base_url, user_id, 13, access_token);
+          }
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Financial') >= 0){
+            addGroup(base_url, user_id, 19,access_token);
+          }
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Retail') >= 0){
+            addGroup(base_url, user_id, 15,access_token);
+          }
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Technology') >= 0){
+            addGroup(base_url, user_id, 17,access_token);
+          }
         }
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Technology') >= 0){
-          addGroup(base_url, user_id, 17,access_token);
+        //explorers
+        else{
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Healthcare') >= 0){
+            addGroup(base_url, user_id, 14,access_token);
+          }
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Financial') >= 0){
+            addGroup(base_url, user_id, 20,access_token);
+          }
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Retail') >= 0){
+            addGroup(base_url, user_id, 16,access_token);
+          }
+          if(selection.getCell(row,verticals_column).getValue().indexOf('Technology') >= 0){
+            addGroup(base_url, user_id, 18,access_token);
+          }
         }
-      }
-      //explorers
-      else{
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Healthcare') >= 0){
-          addGroup(base_url, user_id, 14,access_token);
+        send_email(base_url, user_id, access_token, email, se_email, ae_email);
+        var done_value = selection.getCell(row,is_done_column);
+        var new_done_value = '';
+        if (done_value.isBlank()){
+          new_done_value += user_id;
         }
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Financial') >= 0){
-          addGroup(base_url, user_id, 20,access_token);
+        else{
+          new_done_value = selection.getCell(row,is_done_column).getValue() + ',' + user_id;
         }
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Retail') >= 0){
-          addGroup(base_url, user_id, 16,access_token);
+        selection.getCell(row,is_done_column).setValue(new_done_value);
         }
-        if(selection.getCell(row,verticals_column).getValue().indexOf('Technology') >= 0){
-          addGroup(base_url, user_id, 18,access_token);
-        }
-      }
-      //Logger.log(email)
-      send_email(base_url, user_id, access_token, email, se_email, ae_email);
-      var done_value = selection.getCell(row,is_done_column);
-      var new_done_value = '';
-      if (done_value.isBlank()){
-        new_done_value += user_id;
-      }
-      else{
-        new_done_value = selection.getCell(row,is_done_column).getValue() + ',' + user_id;
-      }
-      selection.getCell(row,is_done_column).setValue(new_done_value);
-      }
     } 
   }
 }
@@ -141,8 +139,12 @@ function addEmail(base_url, email, user_id,token) {
 
 // enables user
 function enableUser(base_url,user_id, token) {
-    var options = {'muteHttpExceptions':true, 'method': 'post','headers': {'Authorization': 'token ' + token},'payload': JSON.stringify({'is_disabled': false})};
-    var response = UrlFetchApp.fetch(base_url + "/users/" + user_id, options);
+  Logger.log('enabling user')
+  var options = {'muteHttpExceptions':true, 'method': 'patch','headers': {'Authorization': 'token ' + token},'payload': JSON.stringify({'is_disabled': false})};
+  var response = UrlFetchApp.fetch(base_url + "/users/" + user_id, options);
+  Logger.log(response)
+  var user_id = parseInt(JSON.parse(response.getContentText()).id);
+  return user_id;
 }
 
 // adds user to group
