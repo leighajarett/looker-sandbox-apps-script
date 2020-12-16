@@ -38,14 +38,6 @@ function dataset_request(event) {
 }
 
 function get_results(email, type, weeks = null, opportunity_id = null, partner_name = null, internal_url = null){
-  // var email = "leigha@looker.com"
-  // var opportunity_id = "1164400000ssT5"
-  // var weeks = 5
-  // var type = 'Customer / Prospect'
-  // //var partner_name = 'leighaspartnername'  
-  // var partner_name = null
-  // //var internal_url = 'https://saleseng.looker.com'
-  // var internal_url = null
   var name = opportunity_id;
   
   if (name == null){name = partner_name};
